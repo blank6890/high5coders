@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Organization - Text Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .header {
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .logo i {
+            font-size: 32px;
+            color: #667eea;
+            margin-right: 15px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .logo span {
+            color: #667eea;
+            font-weight: 800;
+        }
+
+        .welcome-text h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .welcome-text p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .success-message {
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+            padding: 10px;
+            background: #d4edda;
+            border-radius: 5px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-sign-in-alt"></i>
+                <h1>Join <span>Organization</span></h1>
+            </div>
+            <div class="welcome-text">
+                <h2>Access Team Files</h2>
+                <p>Enter organization code and password to join</p>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="info-box">
+                <h3><i class="fas fa-info-circle"></i> How to join</h3>
+                <p>Get the organization code and password from your team administrator to access shared files and collaborate.</p>
+            </div>
+
+            <form id="joinOrgForm">
+                <div class="form-group">
+                    <label for="orgCode">Organization Code</label>
+                    <input type="text" id="orgCode" name="orgCode" placeholder="Enter 6-digit organization code" required maxlength="6">
+                    <div class="error-message" id="orgCodeError">Please enter a valid organization code</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="orgPassword">Organization Password</label>
+                    <input type="password" id="orgPassword" name="orgPassword" placeholder="Enter organization password" required>
+                    <div class="error-message" id="orgPasswordError">Please enter the organization password</div>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner"></i> Joining organization...
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitButton">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Join Organization
+                </button>
+
+                <div class="success-message" id="successMessage">
+                    Successfully joined organization! Redirecting...
+                </div>
+            </form>
+
+            <div class="back-link">
+                <a href="dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const joinOrgForm = document.getElementById('joinOrgForm');
+            const orgCodeInput = document.getElementById('orgCode');
+            const orgPasswordInput = document.getElementById('orgPassword');
+            const submitButton = document.getElementById('submitButton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+
+            joinOrgForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const orgCode = orgCodeInput.value.trim().toUpperCase();
+                const orgPassword = orgPasswordInput.value;
+                
+                let isValid = true;
+                
+                // Clear previous messages
+                document.getElementById('orgCodeError').style.display = 'none';
+                document.getElementById('orgPasswordError').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'none';
+                
+                // Validate organization code
+                if (orgCode.length !== 6) {
+                    document.getElementById('orgCodeError').textContent = 'Organization code must be 6 characters';
+                    document.getElementById('orgCodeError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Validate password
+                if (orgPassword.length === 0) {
+                    document.getElementById('orgPasswordError').textContent = 'Please enter organization password';
+                    document.getElementById('orgPasswordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    // Show loading state
+                    submitButton.disabled = true;
+                    loadingIndicator.style.display = 'block';
+                    
+                    try {
+                        // Get current user from URL or localStorage
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const username = urlParams.get('user') || localStorage.getItem('currentUser') || 'demo';
+                        
+                        const formData = new URLSearchParams();
+                        formData.append('orgCode', orgCode);
+                        formData.append('orgPassword', orgPassword);
+                        formData.append('username', username);
+                        
+                        const response = await fetch('http://localhost:8080/join_org', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            },
+                            body: formData.toString()
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok && result.status === 'success') {
+                            // Success
+                            document.getElementById('successMessage').textContent = result.message;
+                            document.getElementById('successMessage').style.display = 'block';
+                            
+                            // Store organization info
+                            localStorage.setItem('currentOrg', orgCode);
+                            localStorage.setItem('currentOrgName', result.orgName);
+                            
+                            setTimeout(() => {
+                                // Redirect to editor with organization context
+                                window.location.href = `editor.html?user=${encodeURIComponent(username)}&org=${orgCode}`;
+                            }, 1500);
+                        } else {
+                            // Show error from server
+                            if (result.message.includes('Invalid code')) {
+                                document.getElementById('orgCodeError').textContent = 'Invalid organization code';
+                                document.getElementById('orgCodeError').style.display = 'block';
+                            } else if (result.message.includes('Invalid password')) {
+                                document.getElementById('orgPasswordError').textContent = 'Invalid organization password';
+                                document.getElementById('orgPasswordError').style.display = 'block';
+                            } else {
+                                alert('Error: ' + result.message);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Failed to connect to server. Make sure the backend is running on localhost:8080');
+                    } finally {
+                        // Reset loading state
+                        submitButton.disabled = false;
+                        loadingIndicator.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Clear error messages when user starts typing
+            orgCodeInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+                document.getElementById('orgCodeError').style.display = 'none';
+            });
+            
+            orgPasswordInput.addEventListener('input', function() {
+                document.getElementById('orgPasswordError').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

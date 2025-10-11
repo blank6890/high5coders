@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Organization - Text Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #6b8cbc;
+            --dark: #2c3e50;
+            --light: #f5f7fa;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .header {
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .logo i {
+            font-size: 32px;
+            color: #667eea;
+            margin-right: 15px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .logo span {
+            color: #667eea;
+            font-weight: 800;
+        }
+
+        .welcome-text h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .welcome-text p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .success-message {
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+            padding: 10px;
+            background: #d4edda;
+            border-radius: 5px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .org-code-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .org-code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-users"></i>
+                <h1>Create <span>Organization</span></h1>
+            </div>
+            <div class="welcome-text">
+                <h2>Start Collaborating</h2>
+                <p>Create an organization to collaborate with your team</p>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <form id="createOrgForm">
+                <div class="form-group">
+                    <label for="orgName">Organization Name</label>
+                    <input type="text" id="orgName" name="orgName" placeholder="Enter organization name" required>
+                    <div class="error-message" id="orgNameError">Please enter an organization name</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="orgPassword">Organization Password</label>
+                    <input type="password" id="orgPassword" name="orgPassword" placeholder="Set organization password" required minlength="4">
+                    <div class="error-message" id="orgPasswordError">Password must be at least 4 characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm organization password" required>
+                    <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner"></i> Creating organization...
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitButton">
+                    <i class="fas fa-plus"></i>
+                    Create Organization
+                </button>
+
+                <div class="success-message" id="successMessage">
+                    Organization created successfully!
+                </div>
+            </form>
+
+            <div class="org-code-display" id="orgCodeDisplay">
+                <h3>Your Organization Code</h3>
+                <div class="org-code" id="orgCodeValue">XXXXXX</div>
+                <p>Share this code with team members to join your organization</p>
+                <button type="button" class="btn btn-secondary" onclick="copyOrgCode()">
+                    <i class="fas fa-copy"></i> Copy Code
+                </button>
+            </div>
+
+            <div class="back-link">
+                <a href="dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const createOrgForm = document.getElementById('createOrgForm');
+            const orgNameInput = document.getElementById('orgName');
+            const orgPasswordInput = document.getElementById('orgPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const submitButton = document.getElementById('submitButton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+
+            createOrgForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const orgName = orgNameInput.value.trim();
+                const orgPassword = orgPasswordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                let isValid = true;
+                
+                // Clear previous messages
+                document.getElementById('orgNameError').style.display = 'none';
+                document.getElementById('orgPasswordError').style.display = 'none';
+                document.getElementById('confirmPasswordError').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'none';
+                
+                // Validate organization name
+                if (orgName.length === 0) {
+                    document.getElementById('orgNameError').textContent = 'Please enter an organization name';
+                    document.getElementById('orgNameError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Validate password
+                if (orgPassword.length < 4) {
+                    document.getElementById('orgPasswordError').textContent = 'Password must be at least 4 characters';
+                    document.getElementById('orgPasswordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Validate password confirmation
+                if (orgPassword !== confirmPassword) {
+                    document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+                    document.getElementById('confirmPasswordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    // Show loading state
+                    submitButton.disabled = true;
+                    loadingIndicator.style.display = 'block';
+                    
+                    try {
+                        // Get current user from URL or localStorage
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const username = urlParams.get('user') || localStorage.getItem('currentUser') || 'demo';
+                        
+                        const formData = new URLSearchParams();
+                        formData.append('orgName', orgName);
+                        formData.append('orgPassword', orgPassword);
+                        formData.append('username', username);
+                        
+                        const response = await fetch('http://localhost:8080/create_org', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            },
+                            body: formData.toString()
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok && result.status === 'success') {
+                            // Success - show organization code
+                            document.getElementById('successMessage').textContent = result.message;
+                            document.getElementById('successMessage').style.display = 'block';
+                            document.getElementById('orgCodeValue').textContent = result.orgCode;
+                            document.getElementById('orgCodeDisplay').style.display = 'block';
+                            
+                            // Hide form
+                            createOrgForm.style.display = 'none';
+                        } else {
+                            // Show error from server
+                            alert('Error: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Failed to connect to server. Make sure the backend is running on localhost:8080');
+                    } finally {
+                        // Reset loading state
+                        submitButton.disabled = false;
+                        loadingIndicator.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Clear error messages when user starts typing
+            orgNameInput.addEventListener('input', function() {
+                document.getElementById('orgNameError').style.display = 'none';
+            });
+            
+            orgPasswordInput.addEventListener('input', function() {
+                document.getElementById('orgPasswordError').style.display = 'none';
+                document.getElementById('confirmPasswordError').style.display = 'none';
+            });
+            
+            confirmPasswordInput.addEventListener('input', function() {
+                document.getElementById('confirmPasswordError').style.display = 'none';
+            });
+        });
+
+        function copyOrgCode() {
+            const orgCode = document.getElementById('orgCodeValue').textContent;
+            navigator.clipboard.writeText(orgCode).then(function() {
+                alert('Organization code copied to clipboard!');
+            }, function() {
+                alert('Failed to copy code to clipboard');
+            });
+        }
+    </script>
+</body>
+</html>
