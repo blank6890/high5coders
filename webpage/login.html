@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Text Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .header {
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .logo i {
+            font-size: 32px;
+            color: #667eea;
+            margin-right: 15px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .logo span {
+            color: #667eea;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+
+        .welcome-text {
+            margin-bottom: 10px;
+        }
+
+        .welcome-text h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .welcome-text p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .emoji-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .emoji {
+            font-size: 28px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .emoji:nth-child(1) { animation-delay: 0s; }
+        .emoji:nth-child(2) { animation-delay: 0.5s; }
+        .emoji:nth-child(3) { animation-delay: 1s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e1e1;
+            z-index: 1;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .signup-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .demo-accounts {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .demo-accounts h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .demo-accounts p {
+            margin-bottom: 5px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .demo-accounts p:hover {
+            background: #e9ecef;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .success-message {
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+            padding: 10px;
+            background: #d4edda;
+            border-radius: 5px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .server-status {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .server-online {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .server-offline {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-file-alt"></i>
+                <h1><span>Text</span>Editor</h1>
+            </div>
+            
+            <div class="welcome-text">
+                <h2>Welcome Back!</h2>
+                <p>Sign in to access your documents</p>
+            </div>
+            
+            <div class="emoji-container">
+                <div class="emoji">🔐</div>
+                <div class="emoji">📝</div>
+                <div class="emoji">🚀</div>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div id="serverStatus" class="server-status server-offline">
+                <i class="fas fa-exclamation-triangle"></i> Server not connected
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="error-message" id="usernameError">Please enter your username</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button type="button" class="password-toggle" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="error-message" id="passwordError">Please enter your password</div>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner"></i> Signing in...
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitButton">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+
+                <div class="success-message" id="successMessage">
+                    Login successful! Redirecting to editor...
+                </div>
+            </form>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <div class="signup-link">
+                Don't have an account? <a href="start.html">Create Account</a>
+            </div>
+
+            <div class="demo-accounts">
+                <h3>Demo Accounts (Click to auto-fill)</h3>
+                <p data-username="demo" data-password="demo123"><strong>User:</strong> demo / <strong>Pass:</strong> demo123</p>
+                <p data-username="admin" data-password="admin123"><strong>Admin:</strong> admin / <strong>Pass:</strong> admin123</p>
+                <p><em>Or use any account created through signup</em></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const togglePassword = document.getElementById('togglePassword');
+            const submitButton = document.getElementById('submitButton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const serverStatus = document.getElementById('serverStatus');
+
+            // Check server status on load
+            checkServerStatus();
+
+            // Password visibility toggle
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+            
+            // Form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value;
+                
+                let isValid = true;
+                
+                // Clear previous messages
+                document.getElementById('usernameError').style.display = 'none';
+                document.getElementById('passwordError').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'none';
+                
+                // Validate username
+                if (username.length === 0) {
+                    document.getElementById('usernameError').textContent = 'Please enter your username';
+                    document.getElementById('usernameError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Validate password
+                if (password.length === 0) {
+                    document.getElementById('passwordError').textContent = 'Please enter your password';
+                    document.getElementById('passwordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    // Show loading state
+                    submitButton.disabled = true;
+                    loadingIndicator.style.display = 'block';
+                    
+                    try {
+                        // Create form data
+                        const formData = new URLSearchParams();
+                        formData.append('username', username);
+                        formData.append('password', password);
+                        
+                        console.log('Attempting login for user:', username);
+                        
+                        const response = await fetch('http://localhost:8080/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            },
+                            body: formData.toString()
+                        });
+                        
+                        const result = await response.json();
+                        console.log('Server response:', result);
+                        
+                        if (response.ok && result.status === 'success') {
+                            // Success
+                            document.getElementById('successMessage').textContent = result.message;
+                            document.getElementById('successMessage').style.display = 'block';
+                            
+                            // Update server status
+                            serverStatus.className = 'server-status server-online';
+                            serverStatus.innerHTML = '<i class="fas fa-check-circle"></i> Server connected';
+                            
+                            setTimeout(() => {
+                                // Redirect to editor with username
+                                window.location.href = `editor.html?user=${encodeURIComponent(username)}`;
+                            }, 1500);
+                        } else {
+                            // Show error from server
+                            handleLoginError(result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        handleLoginError('Failed to connect to server. Make sure the backend is running on localhost:8080');
+                    } finally {
+                        // Reset loading state
+                        submitButton.disabled = false;
+                        loadingIndicator.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Clear error messages when user starts typing
+            usernameInput.addEventListener('input', function() {
+                document.getElementById('usernameError').style.display = 'none';
+            });
+            
+            passwordInput.addEventListener('input', function() {
+                document.getElementById('passwordError').style.display = 'none';
+            });
+
+            // Function to check server status
+            async function checkServerStatus() {
+                try {
+                    const response = await fetch('http://localhost:8080/', {
+                        method: 'GET'
+                    });
+                    if (response.ok) {
+                        serverStatus.className = 'server-status server-online';
+                        serverStatus.innerHTML = '<i class="fas fa-check-circle"></i> Server connected';
+                    } else {
+                        throw new Error('Server not responding properly');
+                    }
+                } catch (error) {
+                    serverStatus.className = 'server-status server-offline';
+                    serverStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Server not connected - Make sure server.exe is running';
+                }
+            }
+
+            // Function to handle login errors
+            function handleLoginError(message) {
+                if (message.includes('Invalid username') || message.includes('User not found')) {
+                    document.getElementById('usernameError').textContent = 'Invalid username';
+                    document.getElementById('usernameError').style.display = 'block';
+                } else if (message.includes('Invalid password') || message.includes('Incorrect password')) {
+                    document.getElementById('passwordError').textContent = 'Incorrect password';
+                    document.getElementById('passwordError').style.display = 'block';
+                } else {
+                    alert('Login Error: ' + message);
+                }
+                
+                // Update server status to offline if connection failed
+                if (message.includes('Failed to connect')) {
+                    serverStatus.className = 'server-status server-offline';
+                    serverStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Server connection issue';
+                }
+            }
+
+            // Auto-check server status every 30 seconds
+            setInterval(checkServerStatus, 30000);
+
+            // Demo account auto-fill
+            document.querySelectorAll('.demo-accounts p[data-username]').forEach(item => {
+                item.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    const password = this.getAttribute('data-password');
+                    usernameInput.value = username;
+                    passwordInput.value = password;
+                    
+                    // Highlight the selected demo account
+                    document.querySelectorAll('.demo-accounts p').forEach(p => {
+                        p.style.background = 'transparent';
+                    });
+                    this.style.background = '#e3f2fd';
+                });
+            });
+
+            // Auto-focus username field
+            usernameInput.focus();
+        });
+    </script>
+</body>
+</html>

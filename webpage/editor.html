@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .editor-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .editor-header {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .editor-header h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .editor-toolbar {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toolbar-btn {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toolbar-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .editor-content {
+            padding: 20px;
+            min-height: 400px;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 16px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+        .editor-stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="editor-header">
+            <h1>
+                <i class="fas fa-file-alt"></i>
+                Text Editor
+            </h1>
+            <div class="user-info">
+                <span>Welcome, <strong id="usernameDisplay">User</strong>!</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+        
+        <div class="editor-toolbar">
+            <button class="toolbar-btn" onclick="formatText('bold')"><i class="fas fa-bold"></i> Bold</button>
+            <button class="toolbar-btn" onclick="formatText('italic')"><i class="fas fa-italic"></i> Italic</button>
+            <button class="toolbar-btn" onclick="formatText('underline')"><i class="fas fa-underline"></i> Underline</button>
+            <button class="toolbar-btn" onclick="saveFile()"><i class="fas fa-save"></i> Save</button>
+            <button class="toolbar-btn" onclick="newFile()"><i class="fas fa-file"></i> New</button>
+        </div>
+        
+        <div class="editor-content">
+            <textarea id="editor" placeholder="Start typing your document here..."></textarea>
+        </div>
+        
+        <div class="editor-stats">
+            <div>Words: <span id="wordCount">0</span></div>
+            <div>Characters: <span id="charCount">0</span></div>
+            <div>Lines: <span id="lineCount">0</span></div>
+        </div>
+    </div>
+
+    <script>
+        // Update stats
+        function updateStats() {
+            const text = document.getElementById('editor').value;
+            document.getElementById('wordCount').textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
+            document.getElementById('charCount').textContent = text.length;
+            document.getElementById('lineCount').textContent = text.split('\n').length;
+        }
+
+        // Text formatting functions
+        function formatText(type) {
+            const editor = document.getElementById('editor');
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const selectedText = editor.value.substring(start, end);
+            
+            let formattedText = selectedText;
+            switch(type) {
+                case 'bold':
+                    formattedText = `**${selectedText}**`;
+                    break;
+                case 'italic':
+                    formattedText = `*${selectedText}*`;
+                    break;
+                case 'underline':
+                    formattedText = `__${selectedText}__`;
+                    break;
+            }
+            
+            editor.value = editor.value.substring(0, start) + formattedText + editor.value.substring(end);
+            updateStats();
+        }
+
+        // File operations
+        function saveFile() {
+            const content = document.getElementById('editor').value;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('File saved successfully!');
+        }
+
+        function newFile() {
+            if (confirm('Start a new document? Unsaved changes will be lost.')) {
+                document.getElementById('editor').value = '';
+                updateStats();
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize
+        document.getElementById('editor').addEventListener('input', updateStats);
+        updateStats();
+
+        // Display username from URL parameters or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('user') || 'User';
+        document.getElementById('usernameDisplay').textContent = username;
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</body>
+</html>
