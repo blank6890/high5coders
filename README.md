@@ -5,3 +5,7 @@ MEGATHON 2025
 2. Then sign-in using the login portal.
 3. create an organization to make and edit files.
 4. the raw structure of the editor is shown.
+
+link to video simulation:
+
+https://drive.google.com/file/d/1V9rmtg1R3x0U1Ju4M9PdRWOHHMduX7jv/view?usp=drive_link
