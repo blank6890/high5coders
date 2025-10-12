@@ -1,3 +1,0 @@
-# Files Database
-# Format: id|filename|content|owner|org_code|created_at|modified_at
-

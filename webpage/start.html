@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Text Editor</title>
+    <title>Welcome - Text Editor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -70,11 +70,6 @@
         .logo span {
             color: #667eea;
             font-weight: 800;
-            text-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-        }
-
-        .welcome-text {
-            margin-bottom: 10px;
         }
 
         .welcome-text h2 {
@@ -87,27 +82,6 @@
         .welcome-text p {
             color: #666;
             font-size: 16px;
-        }
-
-        .emoji-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .emoji {
-            font-size: 28px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .emoji:nth-child(1) { animation-delay: 0s; }
-        .emoji:nth-child(2) { animation-delay: 0.5s; }
-        .emoji:nth-child(3) { animation-delay: 1s; }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
         }
 
         .form-container {
@@ -192,13 +166,9 @@
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
         }
 
         .btn:disabled {
@@ -250,25 +220,6 @@
             text-decoration: underline;
         }
 
-        .demo-accounts {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 25px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .demo-accounts h3 {
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 16px;
-        }
-
-        .demo-accounts p {
-            margin-bottom: 5px;
-        }
-
         .error-message {
             color: #e74c3c;
             font-size: 14px;
@@ -279,7 +230,7 @@
         .success-message {
             color: #27ae60;
             font-size: 14px;
-            margin-top: 8px;
+            margin-top: 15px;
             display: none;
             text-align: center;
             padding: 10px;
@@ -304,20 +255,24 @@
             100% { transform: rotate(360deg); }
         }
 
-        .terms {
-            font-size: 12px;
-            color: #999;
+        .server-status {
             text-align: center;
-            margin-top: 15px;
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 14px;
         }
 
-        .terms a {
-            color: #667eea;
-            text-decoration: none;
+        .server-online {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
-        .terms a:hover {
-            text-decoration: underline;
+        .server-offline {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
@@ -333,15 +288,13 @@
                 <h2>Create Your Account</h2>
                 <p>Join thousands of users who trust our editor</p>
             </div>
-            
-            <div class="emoji-container">
-                <div class="emoji">👋</div>
-                <div class="emoji">🚀</div>
-                <div class="emoji">💻</div>
-            </div>
         </div>
         
         <div class="form-container">
+            <div id="serverStatus" class="server-status server-offline">
+                <i class="fas fa-exclamation-triangle"></i> Server not connected
+            </div>
+
             <form id="signupForm">
                 <div class="form-group">
                     <label for="username">Username</label>
@@ -376,7 +329,11 @@
                     <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner"></i> Creating account...
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitButton">
                     <i class="fas fa-user-plus"></i>
                     Create Account
                 </button>
@@ -393,87 +350,96 @@
             <div class="login-link">
                 Already have an account? <a href="login.html">Sign In</a>
             </div>
-
-            <div class="demo-accounts">
-                <h3>Demo Accounts</h3>
-                <p><strong>User:</strong> demo / <strong>Pass:</strong> demo123</p>
-                <p><strong>Admin:</strong> admin / <strong>Pass:</strong> admin123</p>
-            </div>
-
-            <div class="terms">
-                By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-            </div>
         </div>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const signupForm = document.getElementById('signupForm');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-        const togglePassword = document.getElementById('togglePassword');
-        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-        
-        // Password visibility toggle
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-        });
-        
-        toggleConfirmPassword.addEventListener('click', function() {
-            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPasswordInput.setAttribute('type', type);
-            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-        });
-        
-        // Form validation and submission
-        signupForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
-            
-            let isValid = true;
-            
-            // Clear previous messages
-            document.getElementById('usernameError').style.display = 'none';
-            document.getElementById('passwordError').style.display = 'none';
-            document.getElementById('confirmPasswordError').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'none';
-            
-            // Validate username
-            if (username.length < 3) {
-                document.getElementById('usernameError').textContent = 'Username must be at least 3 characters';
-                document.getElementById('usernameError').style.display = 'block';
-                isValid = false;
+    <script>
+        // Check server status
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('http://localhost:8080/', { method: 'GET' });
+                if (response.ok) {
+                    document.getElementById('serverStatus').className = 'server-status server-online';
+                    document.getElementById('serverStatus').innerHTML = '<i class="fas fa-check-circle"></i> Server connected';
+                    return true;
+                }
+            } catch (error) {
+                document.getElementById('serverStatus').className = 'server-status server-offline';
+                document.getElementById('serverStatus').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Server not connected';
+                return false;
             }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const signupForm = document.getElementById('signupForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const togglePassword = document.getElementById('togglePassword');
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            const submitButton = document.getElementById('submitButton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+
+            // Check server status on load
+            checkServerStatus();
+            setInterval(checkServerStatus, 30000);
             
-            // Validate password
-            if (password.length < 8) {
-                document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
-                document.getElementById('passwordError').style.display = 'block';
-                isValid = false;
-            }
+            // Password visibility toggle
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
             
-            // Validate password confirmation
-            if (password !== confirmPassword) {
-                document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
-                document.getElementById('confirmPasswordError').style.display = 'block';
-                isValid = false;
-            }
+            toggleConfirmPassword.addEventListener('click', function() {
+                const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmPasswordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
             
-            if (isValid) {
+            // Form validation and submission
+            signupForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                // Clear previous messages
+                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+                document.getElementById('successMessage').style.display = 'none';
+                
+                let isValid = true;
+                
+                // Validate username
+                if (username.length < 3) {
+                    document.getElementById('usernameError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Validate password
+                if (password.length < 8) {
+                    document.getElementById('passwordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Validate password confirmation
+                if (password !== confirmPassword) {
+                    document.getElementById('confirmPasswordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+                
+                // Show loading state
+                submitButton.disabled = true;
+                loadingIndicator.style.display = 'block';
+                
                 try {
-                    // Create form data with proper encoding
                     const formData = new URLSearchParams();
                     formData.append('username', username);
                     formData.append('password', password);
                     formData.append('confirmPassword', confirmPassword);
-                    
-                    console.log('Submitting form data to server...');
                     
                     const response = await fetch('http://localhost:8080/signup', {
                         method: 'POST',
@@ -484,21 +450,14 @@
                     });
                     
                     const result = await response.json();
-                    console.log('Server response:', result);
                     
                     if (response.ok && result.status === 'success') {
-                        // Success
-                        document.getElementById('successMessage').textContent = result.message;
                         document.getElementById('successMessage').style.display = 'block';
-                        
                         setTimeout(() => {
-                            alert('Account created successfully! You can now login with your credentials.');
-                            // Redirect to login page
                             window.location.href = 'login.html';
                         }, 1500);
                     } else {
-                        // Show error from server
-                        if (result.message.includes('Username already exists')) {
+                        if (result.message.includes('already exists')) {
                             document.getElementById('usernameError').textContent = result.message;
                             document.getElementById('usernameError').style.display = 'block';
                         } else {
@@ -507,25 +466,21 @@
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Failed to connect to server. Make sure the backend is running on localhost:8080');
+                    alert('Failed to connect to server. Please ensure server.exe is running.');
+                } finally {
+                    submitButton.disabled = false;
+                    loadingIndicator.style.display = 'none';
                 }
-            }
+            });
+            
+            // Clear error messages on input
+            usernameInput.addEventListener('input', () => document.getElementById('usernameError').style.display = 'none');
+            passwordInput.addEventListener('input', () => {
+                document.getElementById('passwordError').style.display = 'none';
+                document.getElementById('confirmPasswordError').style.display = 'none';
+            });
+            confirmPasswordInput.addEventListener('input', () => document.getElementById('confirmPasswordError').style.display = 'none');
         });
-        
-        // Clear error messages when user starts typing
-        usernameInput.addEventListener('input', function() {
-            document.getElementById('usernameError').style.display = 'none';
-        });
-        
-        passwordInput.addEventListener('input', function() {
-            document.getElementById('passwordError').style.display = 'none';
-            document.getElementById('confirmPasswordError').style.display = 'none';
-        });
-        
-        confirmPasswordInput.addEventListener('input', function() {
-            document.getElementById('confirmPasswordError').style.display = 'none';
-        });
-    });
-</script>
+    </script>
 </body>
 </html>

@@ -1,5 +1,0 @@
-# Organization Database
-# Format: code|name|password|creator|member_count|member1|member2|...
-
-GNK9P2|test|hitesh6890|demo|1|demo
-92CNLW|sindhu|sindhu12345|demo|1|demo

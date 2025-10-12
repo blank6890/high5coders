@@ -492,10 +492,14 @@
                             serverStatus.className = 'server-status server-online';
                             serverStatus.innerHTML = '<i class="fas fa-check-circle"></i> Server connected';
                             
-                            setTimeout(() => {
-                                // Redirect to editor with username
-                                window.location.href = `dashboard.html?user=${encodeURIComponent(username)}`;
-                            }, 1500);
+                            // In the login success handler in login.html
+setTimeout(() => {
+    // Store user info
+    localStorage.setItem('currentUser', username);
+    
+    // Redirect to dashboard with username
+    window.location.href = `dashboard.html?user=${encodeURIComponent(username)}`;
+}, 1500);
                         } else {
                             // Show error from server
                             handleLoginError(result.message);

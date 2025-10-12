@@ -1,204 +1,503 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Editor</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Editor — Enhanced</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root{
+            --primary: #4a6fa5;
+            --secondary:#6b8cbc;
+            --dark:#2c3e50;
+            --light:#f5f7fa;
+            --bg: #eef2f7;
+            --text:#222;
+            --success:#2ecc71;
+            --danger:#e74c3c;
         }
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+        [data-theme="dark"]{
+            --bg:#14171a;
+            --light:#1b1f23;
+            --text:#e6eef6;
         }
-        .editor-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .editor-header {
-            background: linear-gradient(to right, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .editor-header h1 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .editor-toolbar {
-            background: #f8f9fa;
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .toolbar-btn {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .toolbar-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-        .editor-content {
-            padding: 20px;
-            min-height: 400px;
-        }
-        textarea {
-            width: 100%;
-            height: 400px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 15px;
-            font-size: 16px;
-            resize: vertical;
-            font-family: 'Courier New', monospace;
-        }
-        .editor-stats {
-            background: #f8f9fa;
-            padding: 15px;
-            border-top: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            color: #666;
-        }
-        .logout-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .logout-btn:hover {
-            background: #c82333;
-        }
+        *{box-sizing:border-box;margin:0;padding:0;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+        body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden}
+        header{background:var(--dark);color:white;padding:10px 16px;display:flex;align-items:center;gap:12px}
+        .logo{display:flex;align-items:center;gap:10px;font-weight:600}
+        .file-info{flex:1;display:flex;align-items:center;gap:12px}
+        .filename-input{padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:white}
+        .toolbar{background:var(--light);padding:10px;display:flex;gap:10px;align-items:center;border-bottom:1px solid rgba(0,0,0,0.06)}
+        .tool-btn{background:none;border:none;padding:8px 10px;border-radius:6px;cursor:pointer}
+        .tool-btn:hover{background:rgba(0,0,0,0.04)}
+        .sync-btn{background:var(--success);color:white;border:none;padding:8px 12px;border-radius:6px}
+        .editor-container{display:flex;flex:1;overflow:hidden}
+        .sidebar{width:300px;background:var(--light);border-right:1px solid rgba(0,0,0,0.06);display:flex;flex-direction:column;transition:width .12s}
+        .resize-handle{width:6px;cursor:col-resize;background:transparent}
+        .main{flex:1;display:flex;flex-direction:column}
+        #editor{flex:1;padding:20px;font-size:16px;outline:none;border:none;resize:none;background:white;font-family: 'Courier New', monospace}
+        #editor[readonly]{background:#f2f3f5}
+        .status-bar{background:var(--light);padding:8px 16px;border-top:1px solid rgba(0,0,0,0.06);display:flex;justify-content:space-between}
+        .file-list{list-style:none;padding:10px;overflow:auto}
+        .file-item{padding:8px;border-radius:6px;display:flex;align-items:center;gap:8px;cursor:pointer}
+        .file-item:hover{background:rgba(0,0,0,0.03)}
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:2000}
+        .modal.show{display:flex}
+        .modal-content{background:white;border-radius:10px;padding:20px;width:90%;max-width:500px}
+        .btn{padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+        .btn-primary{background:var(--primary);color:white}
+        .btn-secondary{background:#6c757d;color:white}
+        /* Toasts */
+        .toast-wrap{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;z-index:9999}
+        .toast{padding:10px 14px;border-radius:8px;color:white;background:rgba(0,0,0,0.7);min-width:180px;box-shadow:0 6px 18px rgba(0,0,0,0.2)}
+        .toast.success{background:var(--success)}
+        .toast.warn{background:var(--danger)}
+        /* Search results */
+        .search-results{position:absolute;top:40px;left:0;background:white;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.12);max-height:240px;overflow:auto;display:none;z-index:1000}
+        .search-results.show{display:block}
+        .preview{padding:12px;max-height:260px;overflow:auto;background:#fafafa;border-top:1px solid #eee}
+        /* responsive */
+        @media (max-width:800px){.sidebar{width:220px}}
     </style>
 </head>
-<body>
-    <div class="editor-container">
-        <div class="editor-header">
-            <h1>
-                <i class="fas fa-file-alt"></i>
-                Text Editor
-            </h1>
-            <div class="user-info">
-                <span>Welcome, <strong id="usernameDisplay">User</strong>!</span>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
+<body data-theme="light">
+    <header>
+        <div class="logo"><i class="fas fa-file-alt" style="color:var(--secondary)"></i><span>Text Editor</span></div>
+
+        <div class="file-info">
+            <input id="filename" class="filename-input" placeholder="Enter file name..." value="untitled.txt" />
+            <div style="display:flex;gap:8px;align-items:center">
+                <div id="lockStatus" style="padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.06);font-size:13px;display:flex;gap:8px;align-items:center"><i class="fas fa-lock-open"></i><span id="lockText">Unlocked</span></div>
+                <div style="display:flex;align-items:center;gap:6px">
+                    <button id="themeToggle" class="tool-btn" title="Toggle theme"><i class="fas fa-moon"></i></button>
+                    <button id="previewToggle" class="tool-btn" title="Toggle preview"><i class="fas fa-eye"></i></button>
+                </div>
             </div>
         </div>
-        
-        <div class="editor-toolbar">
-            <button class="toolbar-btn" onclick="formatText('bold')"><i class="fas fa-bold"></i> Bold</button>
-            <button class="toolbar-btn" onclick="formatText('italic')"><i class="fas fa-italic"></i> Italic</button>
-            <button class="toolbar-btn" onclick="formatText('underline')"><i class="fas fa-underline"></i> Underline</button>
-            <button class="toolbar-btn" onclick="saveFile()"><i class="fas fa-save"></i> Save</button>
-            <button class="toolbar-btn" onclick="newFile()"><i class="fas fa-file"></i> New</button>
+
+        <div style="display:flex;align-items:center;gap:12px">
+            <div style="position:relative">
+                <input id="searchInput" placeholder="Search files..." style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1)" />
+                <div id="searchResults" class="search-results"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+                <div id="usernameDisplay">User</div>
+                <div id="userAvatar" style="width:36px;height:36px;border-radius:50%;background:var(--secondary);display:flex;align-items:center;justify-content:center;color:white;cursor:pointer">U</div>
+            </div>
         </div>
-        
-        <div class="editor-content">
-            <textarea id="editor" placeholder="Start typing your document here..."></textarea>
+    </header>
+
+    <div class="toolbar" role="toolbar" aria-label="Editor toolbar">
+        <label for="fontFamily" class="sr-only">Font Family</label>
+        <select id="fontFamily" aria-label="Font Family">
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Courier New', monospace" selected>Courier New</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+        </select>
+        <label for="fontSize" class="sr-only">Font Size</label>
+        <select id="fontSize" aria-label="Font Size">
+            <option>12</option>
+            <option selected>14</option>
+            <option>16</option>
+            <option>18</option>
+            <option>20</option>
+        </select>
+
+        <button class="tool-btn" data-cmd="bold" title="Bold" aria-label="Bold"><i class="fas fa-bold"></i></button>
+        <button class="tool-btn" data-cmd="italic" title="Italic" aria-label="Italic"><i class="fas fa-italic"></i></button>
+        <button class="tool-btn" data-cmd="underline" title="Underline" aria-label="Underline"><i class="fas fa-underline"></i></button>
+
+        <div style="flex:1"></div>
+
+        <button id="saveButton" class="tool-btn" aria-label="Save"><i class="fas fa-save"></i> Save</button>
+        <button id="newButton" class="tool-btn" aria-label="New File"><i class="fas fa-file"></i> New</button>
+        <button id="downloadButton" class="tool-btn" aria-label="Download"><i class="fas fa-download"></i> Download</button>
+        <button id="syncButton" class="sync-btn" disabled aria-label="Sync to Org"><i class="fas fa-cloud-upload-alt"></i> Sync to Org</button>
+    </div>
+
+    <div class="editor-container">
+        <div class="sidebar" id="sidebar">
+            <div style="padding:12px;border-bottom:1px solid rgba(0,0,0,0.04);display:flex;justify-content:space-between;align-items:center">
+                <strong>Files</strong>
+                <button id="refreshFiles" class="tool-btn" title="Refresh"><i class="fas fa-sync"></i></button>
+            </div>
+            <ul id="fileList" class="file-list"><li style="padding:12px;color:#666">No files</li></ul>
         </div>
-        
-        <div class="editor-stats">
-            <div>Words: <span id="wordCount">0</span></div>
-            <div>Characters: <span id="charCount">0</span></div>
-            <div>Lines: <span id="lineCount">0</span></div>
+        <div class="resize-handle" id="resizeHandle" title="Drag to resize sidebar"></div>
+
+        <div class="main">
+            <textarea id="editor" placeholder="Start typing your document here..." aria-label="Editor" tabindex="0"></textarea>
+            <div class="preview" id="preview" style="display:none"></div>
         </div>
     </div>
 
+    <div class="status-bar">
+        <div style="display:flex;gap:14px;align-items:center">
+            <span id="wordCount">Words: 0</span>
+            <span id="charCount">Chars: 0</span>
+            <span id="lastSaved">Not saved</span>
+        </div>
+        <div><span id="userRole">Role: User</span></div>
+    </div>
+
+    <div class="toast-wrap" id="toasts"></div>
+
+    <div class="modal" id="newFileModal">
+        <div class="modal-content">
+            <h3>Create new file</h3>
+            <input id="newFilename" class="form-control" placeholder="filename.txt" style="width:100%;padding:8px;margin-top:10px;border:1px solid #ddd;border-radius:6px" />
+            <div style="margin-top:12px;text-align:right">
+                <button class="btn btn-secondary" onclick="closeModal('newFileModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createNewFile()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+        @media (max-width:600px){
+            .editor-container{flex-direction:column;}
+            .sidebar{width:100%!important;min-width:0;max-width:none;border-right:none;border-bottom:1px solid #eee;}
+            .main{width:100%;}
+            .toolbar{flex-wrap:wrap;gap:6px;}
+        }
+    </style>
     <script>
-        // Update stats
-        function updateStats() {
-            const text = document.getElementById('editor').value;
-            document.getElementById('wordCount').textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
-            document.getElementById('charCount').textContent = text.length;
-            document.getElementById('lineCount').textContent = text.split('\n').length;
-        }
+    // --- Real-time Collaboration (WebSocket) ---
+    let ws = null;
+    let userColor = null;
+    let userId = null;
+    let orgCode = null;
+    let fileId = null;
+    let remoteCursors = {};
 
-        // Text formatting functions
-        function formatText(type) {
-            const editor = document.getElementById('editor');
-            const start = editor.selectionStart;
-            const end = editor.selectionEnd;
-            const selectedText = editor.value.substring(start, end);
-            
-            let formattedText = selectedText;
-            switch(type) {
-                case 'bold':
-                    formattedText = `**${selectedText}**`;
-                    break;
-                case 'italic':
-                    formattedText = `*${selectedText}*`;
-                    break;
-                case 'underline':
-                    formattedText = `__${selectedText}__`;
-                    break;
-            }
-            
-            editor.value = editor.value.substring(0, start) + formattedText + editor.value.substring(end);
-            updateStats();
-        }
+    function randomColor() {
+        const colors = ['#e74c3c','#2ecc71','#3498db','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e'];
+        return colors[Math.floor(Math.random()*colors.length)];
+    }
 
-        // File operations
-        function saveFile() {
-            const content = document.getElementById('editor').value;
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'document.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-            alert('File saved successfully!');
-        }
-
-        function newFile() {
-            if (confirm('Start a new document? Unsaved changes will be lost.')) {
-                document.getElementById('editor').value = '';
-                updateStats();
-            }
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = 'login.html';
-            }
-        }
-
-        // Initialize
-        document.getElementById('editor').addEventListener('input', updateStats);
-        updateStats();
-
-        // Display username from URL parameters or localStorage
+    function connectWebSocket() {
+        // Get user/org/file from URL/localStorage
         const urlParams = new URLSearchParams(window.location.search);
-        const username = urlParams.get('user') || 'User';
-        document.getElementById('usernameDisplay').textContent = username;
+        userId = urlParams.get('user') || localStorage.getItem('currentUser') || 'demo';
+        orgCode = urlParams.get('org') || localStorage.getItem('currentOrg') || '';
+        fileId = urlParams.get('file') || 'untitled';
+        userColor = randomColor();
+        // Connect to WebSocket server
+        ws = new WebSocket('ws://localhost:8081');
+        ws.onopen = () => {
+            ws.send(JSON.stringify({type:'join', user:userId, org:orgCode, file:fileId, color:userColor}));
+        };
+        ws.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'edit' && msg.user !== userId) {
+                // Apply remote edit (simple replace for demo; use OT/CRDT for production)
+                document.getElementById('editor').value = msg.content;
+                updateStats();
+                renderPreviewIfVisible();
+            } else if (msg.type === 'cursor' && msg.user !== userId) {
+                showRemoteCursor(msg.user, msg.pos, msg.color);
+            }
+        };
+        ws.onclose = () => { setTimeout(connectWebSocket, 2000); };
+    }
+
+    function sendEdit() {
+        if (ws && ws.readyState === 1) {
+            ws.send(JSON.stringify({type:'edit', user:userId, org:orgCode, file:fileId, content:document.getElementById('editor').value}));
+        }
+    }
+
+    function sendCursor() {
+        if (ws && ws.readyState === 1) {
+            const pos = document.getElementById('editor').selectionStart;
+            ws.send(JSON.stringify({type:'cursor', user:userId, org:orgCode, file:fileId, pos, color:userColor}));
+        }
+    }
+
+    function showRemoteCursor(user, pos, color) {
+        // Remove old marker
+        let marker = document.getElementById('cursor-'+user);
+        if (marker) marker.remove();
+        // Add new marker (simple: after textarea, show colored label)
+        const ed = document.getElementById('editor');
+        const rect = ed.getBoundingClientRect();
+        const span = document.createElement('span');
+        span.id = 'cursor-'+user;
+        span.textContent = user;
+        span.style.position = 'absolute';
+        span.style.left = (rect.left + 10) + 'px';
+        span.style.top = (rect.top + 10 + (pos/2)) + 'px';
+        span.style.background = color;
+        span.style.color = '#fff';
+        span.style.padding = '2px 6px';
+        span.style.borderRadius = '6px';
+        span.style.zIndex = 3000;
+        document.body.appendChild(span);
+        setTimeout(()=>{ span.remove(); }, 2000);
+    }
+        // --- State ---
+        let currentFileId = null;
+        let currentUser = 'demo';
+        let userRole = 'user';
+        let autoSaveTimer = null;
+        let contentChanged = false;
+
+        document.addEventListener('DOMContentLoaded', ()=>{
+            connectWebSocket();
+            // Drag and drop file open
+            const editor = document.getElementById('editor');
+            editor.addEventListener('dragover', e=>{ e.preventDefault(); editor.style.background="#e3f2fd"; });
+            editor.addEventListener('dragleave', e=>{ editor.style.background=""; });
+            editor.addEventListener('drop', e=>{
+                e.preventDefault(); editor.style.background="";
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(evt){
+                        editor.value = evt.target.result;
+                        updateStats();
+                        showToast('File loaded: ' + file.name, 'success');
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            // Download button
+            document.getElementById('downloadButton').addEventListener('click', ()=>{
+                const filename = document.getElementById('filename').value || 'untitled.txt';
+                const content = document.getElementById('editor').value;
+                const blob = new Blob([content], {type: 'text/plain'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
+                showToast('Downloaded ' + filename, 'success');
+            });
+            // load user from URL
+            const p = new URLSearchParams(location.search);
+            currentUser = p.get('user') || currentUser;
+            document.getElementById('usernameDisplay').textContent = currentUser;
+            document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
+
+            // bind events
+            document.getElementById('editor').addEventListener('input', e=>{
+                onEditorInput();
+                sendEdit();
+            });
+            document.getElementById('editor').addEventListener('keyup', sendCursor);
+            document.getElementById('fontFamily').addEventListener('change', e=>document.getElementById('editor').style.fontFamily = e.target.value);
+            document.getElementById('fontSize').addEventListener('change', e=>document.getElementById('editor').style.fontSize = e.target.value + 'px');
+            document.querySelectorAll('[data-cmd]').forEach(btn=>btn.addEventListener('click', ()=>applyFormat(btn.dataset.cmd)));
+
+            document.getElementById('saveButton').addEventListener('click', saveFile);
+            document.getElementById('newButton').addEventListener('click', ()=>openModal('newFileModal'));
+            document.getElementById('refreshFiles').addEventListener('click', loadFiles);
+            document.getElementById('searchInput').addEventListener('input', debounce(performLocalSearch, 250));
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('previewToggle').addEventListener('click', togglePreview);
+
+            // keyboard shortcuts
+            window.addEventListener('keydown', (e)=>{
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){
+                    e.preventDefault(); saveFile();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b'){
+                    e.preventDefault(); applyFormat('bold');
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'i'){
+                    e.preventDefault(); applyFormat('italic');
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u'){
+                    e.preventDefault(); applyFormat('underline');
+                }
+            });
+
+            // resizable sidebar
+            setupResizableSidebar();
+
+            // load files
+            loadFiles();
+            updateStats();
+
+            // apply saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon();
+        });
+
+        // --- Toasts ---
+        function showToast(message, type=''){
+            const wrap = document.getElementById('toasts');
+            const t = document.createElement('div');
+            t.className = 'toast ' + (type||'');
+            t.textContent = message;
+            wrap.appendChild(t);
+            setTimeout(()=>{ t.style.opacity = '0'; setTimeout(()=>t.remove(),400) }, 3000);
+        }
+
+        // --- Editor events ---
+        function onEditorInput(){
+            contentChanged = true;
+            updateStats();
+            // debounce auto save
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(()=>{
+                if (contentChanged) { saveFile(true); }
+            }, 4000);
+            renderPreviewIfVisible();
+        }
+
+        function applyFormat(type){
+            const editor = document.getElementById('editor');
+            if (editor.readOnly) { showToast('Read-only mode', 'warn'); return; }
+            const start = editor.selectionStart, end = editor.selectionEnd;
+            const sel = editor.value.slice(start,end);
+            let out = sel;
+            if (type==='bold') out = `**${sel}**`;
+            if (type==='italic') out = `*${sel}*`;
+            if (type==='underline') out = `__${sel}__`;
+            editor.setRangeText(out, start, end, 'end');
+            editor.focus();
+            onEditorInput();
+        }
+
+        function updateStats(){
+            const text = document.getElementById('editor').value;
+            const words = text.trim()? text.trim().split(/\s+/).length : 0;
+            document.getElementById('wordCount').textContent = 'Words: ' + words;
+            document.getElementById('charCount').textContent = 'Chars: ' + text.length;
+        }
+
+        // --- File handling (localStorage-based demo) ---
+        // Accessibility: focus filename input on new file
+        function focusFilenameInput(){
+            setTimeout(()=>{
+                const input = document.getElementById('newFilename');
+                if(input) input.focus();
+            }, 100);
+        }
+        function generateFileId(){ return 'file_' + Math.random().toString(36).slice(2,10); }
+
+        function saveFile(isAuto=false){
+            const filename = document.getElementById('filename').value || 'untitled.txt';
+            const content = document.getElementById('editor').value;
+            if (!filename){ showToast('Enter a filename', 'warn'); return; }
+
+            // optimistic lock check: if org features enabled, we'd check server; for demo we allow local saves
+            const fileData = { id: currentFileId || generateFileId(), filename, content, owner: currentUser, org:'', modified: Date.now() };
+
+            let files = JSON.parse(localStorage.getItem('userFiles')||'[]');
+            files = files.filter(f => f.id !== fileData.id);
+            files.push(fileData);
+            localStorage.setItem('userFiles', JSON.stringify(files));
+
+            currentFileId = fileData.id;
+            contentChanged = false;
+            document.getElementById('lastSaved').textContent = isAuto? 'Auto-saved: '+ new Date().toLocaleTimeString() : 'Last saved: '+ new Date().toLocaleTimeString();
+            showToast(isAuto? 'Auto-saved' : 'File saved');
+            loadFiles();
+        }
+
+        function loadFiles(){
+            const files = JSON.parse(localStorage.getItem('userFiles')||'[]');
+            const list = document.getElementById('fileList');
+            list.innerHTML = '';
+            if (!files.length){ list.innerHTML = '<li style="padding:12px;color:#666">No files</li>'; return; }
+            files.sort((a,b)=>b.modified - a.modified);
+            for (const f of files){
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                li.innerHTML = `<i class="fas fa-file"></i><span style="margin-left:8px">${f.filename}</span><small style="margin-left:auto;color:#666">${new Date(f.modified).toLocaleString()}</small>`;
+                li.onclick = ()=>openFile(f.id);
+                list.appendChild(li);
+            }
+        }
+
+        function openFile(id){
+            const files = JSON.parse(localStorage.getItem('userFiles')||'[]');
+            const file = files.find(x=>x.id===id);
+            if (!file) { showToast('File not found', 'warn'); return; }
+            // simple lock: if another user editing - demo skip
+            currentFileId = file.id;
+            document.getElementById('filename').value = file.filename;
+            document.getElementById('editor').value = file.content;
+            updateStats();
+            showToast('Opened ' + file.filename);
+            renderPreviewIfVisible();
+        }
+
+        function createNewFile(){
+            const name = document.getElementById('newFilename').value.trim();
+            if (!name) { showToast('Enter filename', 'warn'); return; }
+            currentFileId = null;
+            document.getElementById('filename').value = name;
+            document.getElementById('editor').value = '';
+            updateStats();
+            closeModal('newFileModal');
+            showToast('Created ' + name);
+            document.getElementById('editor').focus();
+        }
+
+        // --- Search (local only) ---
+        function performLocalSearch(){
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            const results = document.getElementById('searchResults');
+            results.innerHTML = '';
+            if (q.length < 1){ results.classList.remove('show'); return; }
+            const files = JSON.parse(localStorage.getItem('userFiles')||'[]');
+            const hits = files.filter(f => f.filename.toLowerCase().includes(q) || f.content.toLowerCase().includes(q));
+            if (!hits.length) { results.innerHTML = '<div style="padding:8px">No results</div>'; results.classList.add('show'); return; }
+            for (const h of hits){
+                const div = document.createElement('div');
+                div.style.padding='8px';
+                div.style.borderBottom='1px solid #eee';
+                div.innerHTML = `<strong>${h.filename}</strong><div style="font-size:12px;color:#666">${h.owner} • ${new Date(h.modified).toLocaleString()}</div>`;
+                div.onclick = ()=>{ openFile(h.id); results.classList.remove('show'); document.getElementById('searchInput').value=''; };
+                results.appendChild(div);
+            }
+            results.classList.add('show');
+        }
+
+        // --- Utilities ---
+        function debounce(fn, wait=200){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); } }
+
+    function openModal(id){ document.getElementById(id).classList.add('show'); if(id==='newFileModal'){ focusFilenameInput(); } }
+        function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+        // --- Theme and Preview ---
+        function toggleTheme(){ const cur = document.body.getAttribute('data-theme')==='dark'?'light':'dark'; document.body.setAttribute('data-theme',cur); localStorage.setItem('theme',cur); updateThemeIcon(); }
+        function updateThemeIcon(){ const btn = document.getElementById('themeToggle'); btn.innerHTML = document.body.getAttribute('data-theme')==='dark'? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'; }
+
+        function togglePreview(){ const p = document.getElementById('preview'); const ed = document.getElementById('editor'); if (p.style.display==='none' || p.style.display===''){ p.style.display='block'; renderPreviewIfVisible(); document.getElementById('previewToggle').classList.add('active'); } else { p.style.display='none'; document.getElementById('previewToggle').classList.remove('active'); } }
+        function renderPreviewIfVisible(){ const p=document.getElementById('preview'); if (p.style.display==='none' || p.style.display==='') return; const text = document.getElementById('editor').value || ''; // very small markdown renderer: **bold**, *italic*, __u__
+            let out = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/__(.*?)__/g,'<u>$1</u>').replace(/\n/g,'<br>'); p.innerHTML = out || '<em>Nothing to preview</em>'; }
+
+        // --- Resizable sidebar ---
+        function setupResizableSidebar(){
+            const handle = document.getElementById('resizeHandle');
+            const sidebar = document.getElementById('sidebar');
+            let dragging=false, startX=0, startW=0;
+            handle.addEventListener('mousedown', (e)=>{ dragging=true; startX=e.clientX; startW=sidebar.offsetWidth; document.body.style.cursor='col-resize'; });
+            window.addEventListener('mousemove',(e)=>{ if (!dragging) return; const dx = e.clientX - startX; let newW = startW + dx; newW = Math.max(160, Math.min(560, newW)); sidebar.style.width = newW + 'px'; });
+            window.addEventListener('mouseup', ()=>{ if (dragging) { dragging=false; document.body.style.cursor=''; localStorage.setItem('sidebarWidth', document.getElementById('sidebar').offsetWidth); } });
+            // restore
+            const w = localStorage.getItem('sidebarWidth'); if (w) document.getElementById('sidebar').style.width = w + 'px';
+        }
+
+        // --- Small helpers to replace alerts with toasts ---
+        function confirmDialog(message){ // simple confirm replacement
+            return Promise.resolve(confirm(message));
+        }
+
+        // expose small API to global for quick testing
+        window.showToast = showToast;
+
+        // initial load: create sample file if none
+        (function ensureSample(){ if (!localStorage.getItem('userFiles')){ const s = [{id:generateFileId(), filename:'welcome.txt', content:'Welcome to the enhanced editor!\n\nTry Ctrl+S to save, Ctrl+B/I/U for formatting, toggle preview and theme.' , owner:currentUser, modified:Date.now()}]; localStorage.setItem('userFiles', JSON.stringify(s)); } loadFiles(); })();
+
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>

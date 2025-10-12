@@ -328,8 +328,8 @@
                             localStorage.setItem('currentOrgName', result.orgName);
                             
                             setTimeout(() => {
-                                // Redirect to editor with organization context
-                                window.location.href = `editor.html?user=${encodeURIComponent(username)}&org=${orgCode}`;
+                                // Redirect to dashboard with organization context
+                                window.location.href = `dashboard.html?user=${encodeURIComponent(username)}`;
                             }, 1500);
                         } else {
                             // Show error from server

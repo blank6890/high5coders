@@ -75,6 +75,42 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 10px 0;
+            min-width: 150px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dropdown-item:hover {
+            background: #f5f7fa;
+        }
+
+        .dropdown-item.logout {
+            color: var(--danger);
         }
 
         .org-info {
@@ -161,6 +197,59 @@
             font-style: italic;
             text-align: center;
             padding: 10px;
+        }
+
+        /* Online Users Styles */
+        .online-user-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .online-user-item:hover {
+            background: #f0f2f5;
+        }
+
+        .online-user-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-online {
+            background: var(--success);
+        }
+
+        .status-away {
+            background: var(--warning);
+        }
+
+        .status-offline {
+            background: #95a5a6;
+        }
+
+        .user-role-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: #3498db;
+            color: white;
+            margin-left: auto;
+        }
+
+        .user-role-badge.owner {
+            background: #e74c3c;
+        }
+
+        .user-role-badge.moderator {
+            background: #e67e22;
+        }
+
+        .user-role-badge.spectator {
+            background: #95a5a6;
         }
 
         /* Main Content Styles */
@@ -337,7 +426,20 @@
                 <span id="currentOrgName">No Organization</span>
             </div>
             <span id="usernameDisplay">User</span>
-            <div class="user-avatar" id="userAvatar">U</div>
+            <div class="user-avatar" id="userAvatar">
+                U
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="dropdown-item" onclick="showUserProfile()">
+                        <i class="fas fa-user"></i> Profile
+                    </div>
+                    <div class="dropdown-item" onclick="showSettings()">
+                        <i class="fas fa-cog"></i> Settings
+                    </div>
+                    <div class="dropdown-item logout" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -367,6 +469,15 @@
                 <h3 class="section-title">Current Organization</h3>
                 <div class="org-section">
                     <div id="orgDisplay">
+                        <div class="no-org">Not in an organization</div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="section-title">Online Users</h3>
+                <div class="org-section">
+                    <div id="onlineUsersDashboard">
                         <div class="no-org">Not in an organization</div>
                     </div>
                 </div>
@@ -456,7 +567,52 @@
             
             // Load recent files
             loadRecentFiles();
+            
+            // Setup user dropdown
+            setupUserDropdown();
+            
+            // Load online users
+            loadOnlineUsers();
+            
+            // Refresh online users every 10 seconds
+            setInterval(loadOnlineUsers, 10000);
         });
+
+        function setupUserDropdown() {
+            const avatar = document.getElementById('userAvatar');
+            const dropdown = document.getElementById('userDropdown');
+            
+            avatar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                dropdown.classList.remove('show');
+            });
+        }
+
+        function showUserProfile() {
+            const username = document.getElementById('usernameDisplay').textContent;
+            const currentOrg = localStorage.getItem('currentOrg') || 'None';
+            const currentOrgName = localStorage.getItem('currentOrgName') || 'None';
+            
+            alert(`User Profile:\nUsername: ${username}\nOrganization: ${currentOrgName}\nOrganization Code: ${currentOrg}`);
+        }
+
+        function showSettings() {
+            alert('Settings would open here');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('currentOrg');
+                localStorage.removeItem('currentOrgName');
+                window.location.href = 'start.html';
+            }
+        }
 
         function createNewFile() {
             const username = document.getElementById('usernameDisplay').textContent;
@@ -472,15 +628,24 @@
         }
 
         function loadRecentFiles() {
-            // This would typically come from the server
-            const recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
             const fileList = document.getElementById('recentFiles');
-            
-            if (recentFiles.length === 0) {
-                fileList.innerHTML = '<li class="file-item"><i class="fas fa-file"></i><span>No recent files</span></li>';
-                return;
+            const currentOrg = localStorage.getItem('currentOrg');
+            let recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+            // Only show files for the current organization if in an org
+            if (currentOrg) {
+                recentFiles = recentFiles.filter(f => f.org === currentOrg);
+                if (recentFiles.length === 0) {
+                    fileList.innerHTML = '<li class="file-item"><i class="fas fa-file"></i><span>No recent files for this organization</span></li>';
+                    return;
+                }
+            } else {
+                // Not in an org, show only personal files
+                recentFiles = recentFiles.filter(f => !f.org);
+                if (recentFiles.length === 0) {
+                    fileList.innerHTML = '<li class="file-item"><i class="fas fa-file"></i><span>No personal recent files</span></li>';
+                    return;
+                }
             }
-            
             fileList.innerHTML = '';
             recentFiles.slice(0, 5).forEach(file => {
                 const fileItem = document.createElement('li');
@@ -516,6 +681,80 @@
             } else {
                 window.location.href = `editor.html?user=${encodeURIComponent(username)}&file=${fileId}`;
             }
+        }
+
+        function loadOnlineUsers() {
+            const currentOrg = localStorage.getItem('currentOrg');
+            const onlineUsersDiv = document.getElementById('onlineUsersDashboard');
+            
+            if (!currentOrg) {
+                onlineUsersDiv.innerHTML = '<div class="no-org">Not in an organization</div>';
+                return;
+            }
+            
+            fetch(`http://localhost:8080/get_online_users?org=${currentOrg}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.users.length > 0) {
+                        let html = '';
+                        data.users.forEach(user => {
+                            const now = Math.floor(Date.now() / 1000);
+                            const timeDiff = now - user.last_seen;
+                            let status = 'online';
+                            let statusClass = 'status-online';
+                            
+                            if (timeDiff > 60) {
+                                status = 'away';
+                                statusClass = 'status-away';
+                            }
+                            if (timeDiff > 300) {
+                                status = 'offline';
+                                statusClass = 'status-offline';
+                            }
+                            
+                            // Get user role (in a real app, this would come from the server)
+                            const userRole = getRoleForUser(user.username);
+                            
+                            html += `
+                                <div class="online-user-item">
+                                    <div class="online-user-status ${statusClass}"></div>
+                                    <span>${user.username}</span>
+                                    <span class="user-role-badge ${userRole}">${userRole}</span>
+                                    <small style="margin-left: auto; color: #666; font-size: 0.7rem;">${
+                                        status === 'online' ? 'Online' : 
+                                        status === 'away' ? 'Away' : 'Offline'
+                                    }</small>
+                                </div>
+                            `;
+                        });
+                        onlineUsersDiv.innerHTML = html;
+                    } else {
+                        onlineUsersDiv.innerHTML = '<div class="no-org">No users online</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching online users:', error);
+                    onlineUsersDiv.innerHTML = '<div class="no-org">Error loading users</div>';
+                });
+        }
+
+        function getRoleForUser(username) {
+            // In a real app, this would come from the server
+            // For demo, we'll use localStorage
+            const currentUser = localStorage.getItem('currentUser');
+            if (username === currentUser) {
+                return localStorage.getItem('userRole') || 'user';
+            }
+            
+            // Mock roles for demo users
+            const mockRoles = {
+                'demo': 'owner',
+                'admin': 'moderator',
+                'user2': 'moderator',
+                'user3': 'spectator'
+            };
+            
+            return mockRoles[username] || 'spectator';
         }
     </script>
 </body>
